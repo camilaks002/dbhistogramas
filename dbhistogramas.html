@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard CanSat - Histogramas</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Arial', sans-serif;
+            background-color: #0d1b2a;
+            color: #fff;
+        }
+
+        .dashboard {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .title {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 40px;
+            color: #4CAF50;
+        }
+
+        .histogram-container {
+            background: #1b263b;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background: #1e324e;
+        }
+
+        th, td {
+            border: 1px solid #415a77;
+            padding: 10px;
+            text-align: center;
+            color: #fff;
+        }
+
+        th {
+            background: #2b3e5e;
+            color: #81C784;
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            color: #81C784;
+        }
+
+        .switch-container {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .switch {
+            display: inline-block;
+            background: #1e324e;
+            color: #fff;
+            border: none;
+            padding: 10px 25px;
+            cursor: pointer;
+            font-size: 1em;
+            margin: 0 10px;
+            border-radius: 25px;
+            transition: all 0.3s;
+        }
+
+        .switch.active {
+            background: #4CAF50;
+        }
+
+        .switch:hover {
+            background-color: #81C784;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <h1 class="title">Dashboard CanSat</h1>
+
+        <div class="switch-container">
+            <button class="switch" id="btnComParaquedas">Com Paraquedas</button>
+            <button class="switch" id="btnSemParaquedas">Sem Paraquedas</button>
+        </div>
+
+        <div class="histogram-container">
+            <h2 class="section-title">Frequência da Altura</h2>
+            <table id="tabelaAltura">
+                <thead>
+                    <tr>
+                        <th>Classe</th>
+                        <th>Frequência</th>
+                        <th>Ponto médio</th>
+                        <th>Frequência acumulada</th>
+                        <th>Frequência relativa</th>
+                        <th>Frequência acumulada relativa</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <div id="plotAlturaContainer"></div>
+        </div>
+
+        <div class="histogram-container">
+            <h2 class="section-title">Frequência do Tempo</h2>
+            <table id="tabelaTempo">
+                <thead>
+                    <tr>
+                        <th>Classe</th>
+                        <th>Frequência</th>
+                        <th>Ponto médio</th>
+                        <th>Frequência acumulada</th>
+                        <th>Frequência relativa</th>
+                        <th>Frequência acumulada relativa</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <div id="plotTempoContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        let dadosComParaquedas = {
+            altura: calcularEstatisticas(criarClassesAltura()),
+            tempo: calcularEstatisticas(criarClassesTempo())
+        };
+
+        let dadosSemParaquedas = {
+            altura: calcularEstatisticas(criarClassesAltura().map(c => ({ ...c, frequencia: c.frequencia - 3 }))),
+            tempo: calcularEstatisticas(criarClassesTempo().map(c => ({ ...c, frequencia: c.frequencia - 1 })))
+        };
+
+        function criarClassesAltura() {
+            const classes = [];
+            const tamClasse = 14.28;
+            for (let i = 0; i < 7; i++) {
+                const inicio = i * tamClasse;
+                const fim = (i + 1) * tamClasse;
+                classes.push({
+                    inicio: inicio.toFixed(2),
+                    fim: fim.toFixed(2),
+                    frequencia: Math.floor(Math.random() * 15) + 5,
+                    pontoMedio: ((inicio + fim) / 2).toFixed(2)
+                });
+            }
+            return classes;
+        }
+
+        function criarClassesTempo() {
+            const classes = [];
+            const tamClasse = 0.8;
+            for (let i = 0; i < 6; i++) {
+                const inicio = i * tamClasse;
+                const fim = (i + 1) * tamClasse;
+                classes.push({
+                    inicio: inicio.toFixed(2),
+                    fim: fim.toFixed(2),
+                    frequencia: Math.floor(Math.random() * 3) + 4,
+                    pontoMedio: ((inicio + fim) / 2).toFixed(2)
+                });
+            }
+            return classes;
+        }
+
+        function calcularEstatisticas(classes) {
+            let freqAcum = 0;
+            const total = classes.reduce((sum, c) => sum + c.frequencia, 0);
+            
+            return classes.map(c => {
+                freqAcum += c.frequencia;
+                const freqRel = (c.frequencia / total * 100).toFixed(0);
+                const freqAcumRel = (freqAcum / total * 100).toFixed(0);
+                return {
+                    ...c,
+                    freqAcum,
+                    freqRel,
+                    freqAcumRel
+                };
+            });
+        }
+
+        function preencherTabela(dados, tableId) {
+            const tbody = document.querySelector(`#${tableId} tbody`);
+            tbody.innerHTML = '';
+            
+            dados.forEach(d => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${d.inicio} |- ${d.fim}</td>
+                    <td>${d.frequencia}</td>
+                    <td>${d.pontoMedio}</td>
+                    <td>${d.freqAcum}</td>
+                    <td>${d.freqRel}%</td>
+                    <td>${d.freqAcumRel}%</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function plotarHistograma(dados, containerId, titulo) {
+            const trace1 = {
+                x: dados.map(d => `${d.inicio} |- ${d.fim}`),
+                y: dados.map(d => d.frequencia),
+                type: 'bar',
+                name: 'Frequência',
+                marker: {
+                    color: '#4CAF50'
+                }
+            };
+
+            const trace2 = {
+                x: dados.map(d => `${d.inicio} |- ${d.fim}`),
+                y: dados.map(d => d.freqAcum),
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: 'Frequência Acumulada',
+                line: {
+                    color: '#81C784'
+                }
+            };
+
+            const layout = {
+                title: titulo,
+                paper_bgcolor: '#1b263b',
+                plot_bgcolor: '#1b263b',
+                font: {
+                    color: '#fff'
+                },
+                showlegend: true,
+                xaxis: {
+                    title: 'Classes',
+                    gridcolor: '#415a77'
+                },
+                yaxis: {
+                    title: 'Frequência',
+                    gridcolor: '#415a77'
+                }
+            };
+
+            Plotly.newPlot(containerId, [trace1, trace2], layout);
+        }
+
+        function atualizarDashboard(dados) {
+            preencherTabela(dados.altura, 'tabelaAltura');
+            preencherTabela(dados.tempo, 'tabelaTempo');
+
+            plotarHistograma(dados.altura, 'plotAlturaContainer', 'Frequência da Altura');
+            plotarHistograma(dados.tempo, 'plotTempoContainer', 'Frequência do Tempo');
+        }
+
+        document.getElementById('btnComParaquedas').addEventListener('click', () => {
+            atualizarDashboard(dadosComParaquedas);
+            document.getElementById('btnComParaquedas').classList.add('active');
+            document.getElementById('btnSemParaquedas').classList.remove('active');
+        });
+
+        document.getElementById('btnSemParaquedas').addEventListener('click', () => {
+            atualizarDashboard(dadosSemParaquedas);
+            document.getElementById('btnSemParaquedas').classList.add('active');
+            document.getElementById('btnComParaquedas').classList.remove('active');
+        });
+
+        atualizarDashboard(dadosComParaquedas);
+    </script>
+</body>
+</html>
