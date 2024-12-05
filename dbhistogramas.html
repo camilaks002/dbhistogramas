@@ -23,7 +23,7 @@
             text-align: center;
             font-size: 2.5em;
             margin-bottom: 40px;
-            color: #4CAF50;
+            color: #2196F3; /* Cor azul */
         }
 
         .histogram-container {
@@ -50,13 +50,13 @@
 
         th {
             background: #2b3e5e;
-            color: #81C784;
+            color: #64B5F6; /* Cor azul clara */
         }
 
         .section-title {
             font-size: 1.5em;
             margin-bottom: 15px;
-            color: #81C784;
+            color: #64B5F6; /* Cor azul clara */
         }
 
         .switch-container {
@@ -78,11 +78,11 @@
         }
 
         .switch.active {
-            background: #4CAF50;
+            background: #2196F3; /* Cor azul */
         }
 
         .switch:hover {
-            background-color: #81C784;
+            background-color: #64B5F6; /* Cor azul clara */
         }
     </style>
 </head>
@@ -219,7 +219,7 @@
                 type: 'bar',
                 name: 'Frequência',
                 marker: {
-                    color: '#4CAF50'
+                    color: '#2196F3' /* Cor azul */
                 }
             };
 
@@ -230,7 +230,7 @@
                 mode: 'lines+markers',
                 name: 'Frequência Acumulada',
                 line: {
-                    color: '#81C784'
+                    color: '#64B5F6' /* Cor azul clara */
                 }
             };
 
@@ -275,6 +275,7 @@
             document.getElementById('btnComParaquedas').classList.remove('active');
         });
 
+        // Inicializar com os dados "Com Paraquedas"
         atualizarDashboard(dadosComParaquedas);
     </script>
 </body>
