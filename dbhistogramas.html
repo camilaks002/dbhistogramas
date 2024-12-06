@@ -1,282 +1,353 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard CanSat - Histogramas</title>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <title>Gráficos e Tabelas</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7fa;
+            color: #333;
             margin: 0;
-            padding: 20px;
-            font-family: 'Arial', sans-serif;
-            background-color: #0d1b2a;
-            color: #fff;
+            padding: 0;
         }
-
-        .dashboard {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .title {
+        header {
+            background-color: #1f4e79;
+            color: white;
+            padding: 15px;
             text-align: center;
-            font-size: 2.5em;
-            margin-bottom: 40px;
-            color: #2196F3; /* Cor azul */
         }
-
-        .histogram-container {
-            background: #1b263b;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 30px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        section {
+            margin: 20px;
         }
-
+        .charts {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+        .chart-container {
+            width: 45%;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
-            background: #1e324e;
+            margin-top: 20px;
         }
-
+        table, th, td {
+            border: 1px solid #ddd;
+        }
         th, td {
-            border: 1px solid #415a77;
             padding: 10px;
             text-align: center;
-            color: #fff;
         }
-
         th {
-            background: #2b3e5e;
-            color: #64B5F6; /* Cor azul clara */
+            background-color: #1f4e79;
+            color: white;
         }
-
-        .section-title {
-            font-size: 1.5em;
-            margin-bottom: 15px;
-            color: #64B5F6; /* Cor azul clara */
-        }
-
-        .switch-container {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .switch {
-            display: inline-block;
-            background: #1e324e;
-            color: #fff;
+        .btn {
+            padding: 10px 20px;
+            background-color: #1f4e79;
+            color: white;
             border: none;
-            padding: 10px 25px;
             cursor: pointer;
-            font-size: 1em;
-            margin: 0 10px;
-            border-radius: 25px;
-            transition: all 0.3s;
+            border-radius: 5px;
+            margin: 10px;
         }
-
-        .switch.active {
-            background: #2196F3; /* Cor azul */
+        .btn:hover {
+            background-color: #163f62;
         }
-
-        .switch:hover {
-            background-color: #64B5F6; /* Cor azul clara */
+        .table-container {
+            overflow-x: auto;
         }
     </style>
 </head>
 <body>
-    <div class="dashboard">
-        <h1 class="title">Dashboard CanSat</h1>
-
-        <div class="switch-container">
-            <button class="switch" id="btnComParaquedas">Com Paraquedas</button>
-            <button class="switch" id="btnSemParaquedas">Sem Paraquedas</button>
+    <header>
+        <h1>Gráficos e Tabelas de Dados</h1>
+    </header>
+    <section>
+        <div class="charts">
+            <!-- Gráficos -->
+            <div class="chart-container">
+                <canvas id="alturaSem"></canvas>
+                <p>Altura - Sem Paraquedas</p>
+            </div>
+            <div class="chart-container">
+                <canvas id="alturaCom"></canvas>
+                <p>Altura - Com Paraquedas</p>
+            </div>
+        </div>
+        <div class="charts">
+            <div class="chart-container">
+                <canvas id="tempoSem"></canvas>
+                <p>Tempo - Sem Paraquedas</p>
+            </div>
+            <div class="chart-container">
+                <canvas id="tempoCom"></canvas>
+                <p>Tempo - Com Paraquedas</p>
+            </div>
         </div>
 
-        <div class="histogram-container">
-            <h2 class="section-title">Frequência da Altura</h2>
-            <table id="tabelaAltura">
+        <button class="btn" onclick="toggleTable('alturaSemTabela')">Exibir Tabela de Altura (Sem Paraquedas)</button>
+        <button class="btn" onclick="toggleTable('alturaComTabela')">Exibir Tabela de Altura (Com Paraquedas)</button>
+        <button class="btn" onclick="toggleTable('tempoSemTabela')">Exibir Tabela de Tempo (Sem Paraquedas)</button>
+        <button class="btn" onclick="toggleTable('tempoComTabela')">Exibir Tabela de Tempo (Com Paraquedas)</button>
+
+        <div id="alturaSemTabela" class="table-container" style="display:none;">
+            <table>
                 <thead>
                     <tr>
-                        <th>Classe</th>
-                        <th>Frequência</th>
-                        <th>Ponto médio</th>
-                        <th>Frequência acumulada</th>
-                        <th>Frequência relativa</th>
-                        <th>Frequência acumulada relativa</th>
+                        <th>Classe (m)</th>
+                        <th>Frequência (f)</th>
+                        <th>Ponto Médio (Pm)</th>
+                        <th>Fa</th>
+                        <th>Fr (%)</th>
+                        <th>Far (%)</th>
                     </tr>
                 </thead>
                 <tbody>
+                    <tr><td>339.10 - 339.73</td><td>20</td><td>339.42</td><td>20</td><td>15.4</td><td>15.4</td></tr>
+                    <tr><td>339.73 - 340.36</td><td>25</td><td>340.05</td><td>45</td><td>19.2</td><td>34.6</td></tr>
+                    <tr><td>340.36 - 340.99</td><td>30</td><td>340.68</td><td>75</td><td>23.1</td><td>57.7</td></tr>
+                    <tr><td>340.99 - 341.62</td><td>27</td><td>341.31</td><td>102</td><td>20.8</td><td>78.5</td></tr>
+                    <tr><td>341.62 - 342.25</td><td>15</td><td>341.94</td><td>117</td><td>11.5</td><td>90.0</td></tr>
+                    <tr><td>342.25 - 342.88</td><td>10</td><td>342.57</td><td>127</td><td>7.7</td><td>97.7</td></tr>
+                    <tr><td>342.88 - 343.51</td><td>3</td><td>343.20</td><td>130</td><td>2.3</td><td>100.0</td></tr>
                 </tbody>
             </table>
-            <div id="plotAlturaContainer"></div>
         </div>
 
-        <div class="histogram-container">
-            <h2 class="section-title">Frequência do Tempo</h2>
-            <table id="tabelaTempo">
+        <div id="alturaComTabela" class="table-container" style="display:none;">
+            <table>
                 <thead>
                     <tr>
-                        <th>Classe</th>
-                        <th>Frequência</th>
-                        <th>Ponto médio</th>
-                        <th>Frequência acumulada</th>
-                        <th>Frequência relativa</th>
-                        <th>Frequência acumulada relativa</th>
+                        <th>Classe (m)</th>
+                        <th>Frequência (f)</th>
+                        <th>Ponto Médio (Pm)</th>
+                        <th>Fa</th>
+                        <th>Fr (%)</th>
+                        <th>Far (%)</th>
                     </tr>
                 </thead>
                 <tbody>
+                    <tr><td>340.00 - 340.79</td><td>15</td><td>340.40</td><td>15</td><td>10.0</td><td>10.0</td></tr>
+                    <tr><td>340.79 - 341.58</td><td>30</td><td>341.19</td><td>45</td><td>20.0</td><td>30.0</td></tr>
+                    <tr><td>341.58 - 342.37</td><td>35</td><td>341.98</td><td>80</td><td>23.3</td><td>53.3</td></tr>
+                    <tr><td>342.37 - 343.16</td><td>28</td><td>342.76</td><td>108</td><td>18.7</td><td>72.0</td></tr>
+                    <tr><td>343.16 - 343.95</td><td>20</td><td>343.56</td><td>128</td><td>13.3</td><td>85.3</td></tr>
+                    <tr><td>343.95 - 344.74</td><td>17</td><td>344.34</td><td>145</td><td>11.3</td><td>96.6</td></tr>
+                    <tr><td>344.74 - 345.53</td><td>5</td><td>345.13</td><td>150</td><td>3.4</td><td>100.0</td></tr>
                 </tbody>
             </table>
-            <div id="plotTempoContainer"></div>
         </div>
-    </div>
 
+        <div id="tempoSemTabela" class="table-container" style="display:none;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Classe (s)</th>
+                        <th>Frequência (f)</th>
+                        <th>Ponto Médio (Pm)</th>
+                        <th>Fa</th>
+                        <th>Fr (%)</th>
+                        <th>Far (%)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>0.00 - 1.63</td><td>15</td><td>0.82</td><td>15</td><td>11.5</td><td>11.5</td></tr>
+                    <tr><td>1.63 - 3.26</td><td>25</td><td>2.45</td><td>40</td><td>19.2</td><td>30.7</td></tr>
+                    <tr><td>3.26 - 4.89</td><td>30</td><td>4.08</td><td>70</td><td>23.1</td><td>53.8</td></tr>
+                    <tr><td>4.89 - 6.52</td><td>35</td><td>5.71</td><td>105</td><td>26.9</td><td>80.7</td></tr>
+                    <tr><td>6.52 - 8.15</td><td>10</td><td>7.03</td><td>115</td><td>7.7</td><td>88.5</td></tr>
+                    <tr><td>8.15 - 9.78</td><td>3</td><td>8.29</td><td>118</td><td>2.3</td><td>90.8</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="tempoComTabela" class="table-container" style="display:none;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Classe (s)</th>
+                        <th>Frequência (f)</th>
+                        <th>Ponto Médio (Pm)</th>
+                        <th>Fa</th>
+                        <th>Fr (%)</th>
+                        <th>Far (%)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>0.00 - 1.50</td><td>20</td><td>0.75</td><td>20</td><td>15.4</td><td>15.4</td></tr>
+                    <tr><td>1.50 - 3.00</td><td>28</td><td>2.25</td><td>48</td><td>21.5</td><td>36.9</td></tr>
+                    <tr><td>3.00 - 4.50</td><td>30</td><td>3.75</td><td>78</td><td>23.1</td><td>60.0</td></tr>
+                    <tr><td>4.50 - 6.00</td><td>22</td><td>5.25</td><td>100</td><td>16.9</td><td>76.9</td></tr>
+                    <tr><td>6.00 - 7.50</td><td>10</td><td>6.75</td><td>110</td><td>7.7</td><td>84.6</td></tr>
+                    <tr><td>7.50 - 9.00</td><td>5</td><td>8.25</td><td>115</td><td>3.8</td><td>88.5</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+    </section>
+    
     <script>
-        let dadosComParaquedas = {
-            altura: calcularEstatisticas(criarClassesAltura()),
-            tempo: calcularEstatisticas(criarClassesTempo())
-        };
-
-        let dadosSemParaquedas = {
-            altura: calcularEstatisticas(criarClassesAltura().map(c => ({ ...c, frequencia: c.frequencia - 3 }))),
-            tempo: calcularEstatisticas(criarClassesTempo().map(c => ({ ...c, frequencia: c.frequencia - 1 })))
-        };
-
-        function criarClassesAltura() {
-            const classes = [];
-            const tamClasse = 14.28;
-            for (let i = 0; i < 7; i++) {
-                const inicio = i * tamClasse;
-                const fim = (i + 1) * tamClasse;
-                classes.push({
-                    inicio: inicio.toFixed(2),
-                    fim: fim.toFixed(2),
-                    frequencia: Math.floor(Math.random() * 15) + 5,
-                    pontoMedio: ((inicio + fim) / 2).toFixed(2)
-                });
-            }
-            return classes;
+        function toggleTable(id) {
+            const table = document.getElementById(id);
+            table.style.display = table.style.display === 'none' ? 'block' : 'none';
         }
 
-        function criarClassesTempo() {
-            const classes = [];
-            const tamClasse = 0.8;
-            for (let i = 0; i < 6; i++) {
-                const inicio = i * tamClasse;
-                const fim = (i + 1) * tamClasse;
-                classes.push({
-                    inicio: inicio.toFixed(2),
-                    fim: fim.toFixed(2),
-                    frequencia: Math.floor(Math.random() * 3) + 4,
-                    pontoMedio: ((inicio + fim) / 2).toFixed(2)
-                });
-            }
-            return classes;
-        }
-
-        function calcularEstatisticas(classes) {
-            let freqAcum = 0;
-            const total = classes.reduce((sum, c) => sum + c.frequencia, 0);
-            
-            return classes.map(c => {
-                freqAcum += c.frequencia;
-                const freqRel = (c.frequencia / total * 100).toFixed(0);
-                const freqAcumRel = (freqAcum / total * 100).toFixed(0);
-                return {
-                    ...c,
-                    freqAcum,
-                    freqRel,
-                    freqAcumRel
-                };
-            });
-        }
-
-        function preencherTabela(dados, tableId) {
-            const tbody = document.querySelector(`#${tableId} tbody`);
-            tbody.innerHTML = '';
-            
-            dados.forEach(d => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${d.inicio} |- ${d.fim}</td>
-                    <td>${d.frequencia}</td>
-                    <td>${d.pontoMedio}</td>
-                    <td>${d.freqAcum}</td>
-                    <td>${d.freqRel}%</td>
-                    <td>${d.freqAcumRel}%</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function plotarHistograma(dados, containerId, titulo) {
-            const trace1 = {
-                x: dados.map(d => `${d.inicio} |- ${d.fim}`),
-                y: dados.map(d => d.frequencia),
-                type: 'bar',
-                name: 'Frequência',
-                marker: {
-                    color: '#2196F3' /* Cor azul */
-                }
-            };
-
-            const trace2 = {
-                x: dados.map(d => `${d.inicio} |- ${d.fim}`),
-                y: dados.map(d => d.freqAcum),
-                type: 'scatter',
-                mode: 'lines+markers',
-                name: 'Frequência Acumulada',
-                line: {
-                    color: '#64B5F6' /* Cor azul clara */
-                }
-            };
-
-            const layout = {
-                title: titulo,
-                paper_bgcolor: '#1b263b',
-                plot_bgcolor: '#1b263b',
-                font: {
-                    color: '#fff'
+        // Gráfico de altura Sem Paraquedas
+        var ctx = document.getElementById('alturaSem').getContext('2d');
+        var alturaSem = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['339.10 - 339.73', '339.73 - 340.36', '340.36 - 340.99', '340.99 - 341.62', '341.62 - 342.25', '342.25 - 342.88', '342.88 - 343.51'],
+                datasets: [{
+                    label: 'Frequência (f)',
+                    data: [20, 25, 30, 27, 15, 10, 3],
+                    backgroundColor: '#4e73df',
+                    borderColor: '#4e73df',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
                 },
-                showlegend: true,
-                xaxis: {
-                    title: 'Classes',
-                    gridcolor: '#415a77'
-                },
-                yaxis: {
-                    title: 'Frequência',
-                    gridcolor: '#415a77'
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Classe (m)'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Frequência (f)'
+                        }
+                    }
                 }
-            };
-
-            Plotly.newPlot(containerId, [trace1, trace2], layout);
-        }
-
-        function atualizarDashboard(dados) {
-            preencherTabela(dados.altura, 'tabelaAltura');
-            preencherTabela(dados.tempo, 'tabelaTempo');
-
-            plotarHistograma(dados.altura, 'plotAlturaContainer', 'Frequência da Altura');
-            plotarHistograma(dados.tempo, 'plotTempoContainer', 'Frequência do Tempo');
-        }
-
-        document.getElementById('btnComParaquedas').addEventListener('click', () => {
-            atualizarDashboard(dadosComParaquedas);
-            document.getElementById('btnComParaquedas').classList.add('active');
-            document.getElementById('btnSemParaquedas').classList.remove('active');
+            }
         });
 
-        document.getElementById('btnSemParaquedas').addEventListener('click', () => {
-            atualizarDashboard(dadosSemParaquedas);
-            document.getElementById('btnSemParaquedas').classList.add('active');
-            document.getElementById('btnComParaquedas').classList.remove('active');
+        // Gráfico de altura Com Paraquedas
+        var ctx = document.getElementById('alturaCom').getContext('2d');
+        var alturaCom = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['340.00 - 340.79', '340.79 - 341.58', '341.58 - 342.37', '342.37 - 343.16', '343.16 - 343.95', '343.95 - 344.74', '344.74 - 345.53'],
+                datasets: [{
+                    label: 'Frequência (f)',
+                    data: [15, 30, 35, 28, 20, 17, 5],
+                    backgroundColor: '#1f4e79',
+                    borderColor: '#1f4e79',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Classe (m)'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Frequência (f)'
+                        }
+                    }
+                }
+            }
         });
 
-        // Inicializar com os dados "Com Paraquedas"
-        atualizarDashboard(dadosComParaquedas);
+        // Gráfico de tempo Sem Paraquedas
+        var ctx = document.getElementById('tempoSem').getContext('2d');
+        var tempoSem = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['0.00 - 1.63', '1.63 - 3.26', '3.26 - 4.89', '4.89 - 6.52', '6.52 - 8.15', '8.15 - 9.78'],
+                datasets: [{
+                    label: 'Frequência (f)',
+                    data: [15, 25, 30, 35, 10, 3],
+                    backgroundColor: '#4e73df',
+                    borderColor: '#4e73df',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Classe (s)'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Frequência (f)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gráfico de tempo Com Paraquedas
+        var ctx = document.getElementById('tempoCom').getContext('2d');
+        var tempoCom = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['0.00 - 1.50', '1.50 - 3.00', '3.00 - 4.50', '4.50 - 6.00', '6.00 - 7.50', '7.50 - 9.00'],
+                datasets: [{
+                    label: 'Frequência (f)',
+                    data: [20, 28, 30, 22, 10, 5],
+                    backgroundColor: '#1f4e79',
+                    borderColor: '#1f4e79',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Classe (s)'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Frequência (f)'
+                        }
+                    }
+                }
+            }
+        });
     </script>
 </body>
 </html>
